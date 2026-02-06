@@ -85,8 +85,19 @@ NS_ListPick:
     if !App.ListBoxes.HasKey(pickedBoxIndex)
         return
 
-    uiTargetSeq := App.ListBoxes[pickedBoxIndex].start + pickedPos - 1
-    NameSel_SelectBySeq(uiTargetSeq, false)
+    uiRow := App.ListBoxes[pickedBoxIndex].rowStart + pickedPos - 1
+    if (uiRow < 1 || uiRow > App.DisplayTotal)
+        return
+
+    rowData := App.DisplayRows[uiRow]
+    if !(IsObject(rowData) && rowData.kind = "item")
+    {
+        if (App.SelectedSeq >= 1 && App.SelectedSeq <= App.Total)
+            NameSel_SelectBySeq(App.SelectedSeq, false)
+        return
+    }
+
+    NameSel_SelectBySeq(rowData.seq, false)
     App.ListNavMode := true
 
     if (A_GuiEvent = "DoubleClick")
@@ -113,7 +124,7 @@ NS_Confirm:
     NameSel_PushSeqHistory(historyText)
     App.LastInput := historyText
 
-    runCmd := NameSel_WriteAndRunCmd(selectedId)
+    runCmd := NameSel_WriteAndRunCmd(selectedItem)
     NameSel_SaveRuntime(selectedSeq, selectedName, selectedId, runCmd)
     NameSel_SaveConfig()
 
@@ -168,6 +179,12 @@ NameSel_Init()
     App.IniPath := fn_libDir . "\NameSelector.ini"
     App.Ready := false
     App.Items := []
+    App.DisplayRows := []
+    App.SeqToRow := {}
+    App.Groups := []
+    App.DisplayTotal := 0
+    App.GroupGapRows := 1
+    App.LoadWarnings := []
     App.ListBoxes := {}
     App.Selecting := false
     App.InputUpdating := false
@@ -183,14 +200,16 @@ NameSel_Init()
     App.SeqHistory := []
 
     App.MaxBoxes := 12
-    App.BaseRowsPerBox := 30
+    App.BaseRowsPerBox := 50
     App.ListNameVarNames := ["NS_List1","NS_List2","NS_List3","NS_List4","NS_List5","NS_List6","NS_List7","NS_List8","NS_List9","NS_List10","NS_List11","NS_List12"]
     App.ListIdxVarNames := ["NS_Idx1","NS_Idx2","NS_Idx3","NS_Idx4","NS_Idx5","NS_Idx6","NS_Idx7","NS_Idx8","NS_Idx9","NS_Idx10","NS_Idx11","NS_Idx12"]
 
-    ; Fixed json path (edit here)
-    hardcodedJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge\User Data\Default\Workspaces\WorkspacesCache"
-    ; Command template (edit here). {id} will be replaced.
+    stableJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge\User Data\Default\Workspaces\WorkspacesCache"
+    betaJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge Beta\User Data\Profile 1\Workspaces\WorkspacesCache"
+
+    ; Command template. {id} will be replaced.
     defaultCmdTemplate := """C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"" --launch-workspace={id}"
+    betaCmdTemplate := """C:\Program Files (x86)\Microsoft\Edge Beta\Application\msedge.exe"" --launch-workspace={id}"
 
     IniRead, confTpl, % App.IniPath, Config, CmdTemplate, %defaultCmdTemplate%
     if (confTpl = "" || confTpl = "ERROR")
@@ -206,18 +225,21 @@ NameSel_Init()
     else
         confLastInput := ""
 
-    App.JsonPath := hardcodedJsonPath
     App.CmdTemplate := confTpl
+    App.Sources := []
+    App.Sources.Push({ label: "Edge", jsonPath: stableJsonPath, cmdTemplate: confTpl })
+    App.Sources.Push({ label: "Edge Beta", jsonPath: betaJsonPath, cmdTemplate: betaCmdTemplate })
     App.SeqHistory := NameSel_LoadSeqHistory(App.IniPath, 10)
 
-    if !NameSel_LoadItems(App.JsonPath)
+    if !NameSel_LoadItemsFromSources()
         return
 
+    NameSel_BuildDisplayRows()
     App.Total := App.Items.MaxIndex()
-    if (App.Total = "")
+    if (App.Total = "" || App.Total <= 0 || App.DisplayTotal <= 0)
         return
 
-    neededBoxes := Ceil(App.Total / App.BaseRowsPerBox)
+    neededBoxes := Ceil(App.DisplayTotal / App.BaseRowsPerBox)
     if (neededBoxes <= App.MaxBoxes)
     {
         App.BoxCount := neededBoxes
@@ -226,7 +248,7 @@ NameSel_Init()
     else
     {
         App.BoxCount := App.MaxBoxes
-        App.RowsPerBox := Ceil(App.Total / App.BoxCount)
+        App.RowsPerBox := Ceil(App.DisplayTotal / App.BoxCount)
     }
 
     if (App.LastSeq < 1 || App.LastSeq > App.Total)
@@ -275,19 +297,19 @@ NameSel_ShowGui()
     }
 
     leftX := 20
-    leftW := 320
+    leftW := 280
     listStartX := leftX + leftW + 24
     listLabelY := 20
     listY := 52
-    nameW := 220
-    idxW := 44
+    nameW := 190
+    idxW := 42
     colGap := 1
     panelW := nameW + colGap + idxW
-    listGap := 40
+    listGap := 18
     btnGap := 12
     btnW := Floor((leftW - btnGap) / 2)
     btn2X := leftX + btnW + btnGap
-    rowPx := 18
+    rowPx := 16
     listH := (App.RowsPerBox * rowPx) + 8
     buttonY := listY + listH + 20
     winW := listStartX + (App.BoxCount * panelW) + ((App.BoxCount - 1) * listGap) + 20
@@ -309,10 +331,10 @@ NameSel_ShowGui()
     Loop, % App.BoxCount
     {
         buildBoxIndex := A_Index
-        startSeq := ((buildBoxIndex - 1) * App.RowsPerBox) + 1
-        endSeq := buildBoxIndex * App.RowsPerBox
-        if (endSeq > App.Total)
-            endSeq := App.Total
+        startRow := ((buildBoxIndex - 1) * App.RowsPerBox) + 1
+        endRow := buildBoxIndex * App.RowsPerBox
+        if (endRow > App.DisplayTotal)
+            endRow := App.DisplayTotal
 
         nameVar := App.ListNameVarNames[buildBoxIndex]
         idxVar := App.ListIdxVarNames[buildBoxIndex]
@@ -326,18 +348,18 @@ NameSel_ShowGui()
 
         namePipe := ""
         idxPipe := ""
-        currentSeq := startSeq
-        while (currentSeq <= endSeq)
+        currentRow := startRow
+        while (currentRow <= endRow)
         {
-            rowItem := App.Items[currentSeq]
+            rowItem := App.DisplayRows[currentRow]
             namePipe .= rowItem.name . "|"
-            idxPipe .= "[" . rowItem.seq . "]|"
-            currentSeq++
+            idxPipe .= rowItem.idx . "|"
+            currentRow++
         }
         GuiControl, NS:, %nameVar%, |%namePipe%
         GuiControl, NS:, %idxVar%, |%idxPipe%
 
-        App.ListBoxes[buildBoxIndex] := { nameVar: nameVar, idxVar: idxVar, start: startSeq, end: endSeq }
+        App.ListBoxes[buildBoxIndex] := { nameVar: nameVar, idxVar: idxVar, rowStart: startRow, rowEnd: endRow }
     }
 
     Gui, NS:Show, Center w%winW% h%winH%, Name Selector
@@ -351,15 +373,18 @@ NameSel_SelectBySeq(seq, writeInput := false)
 
     if (seq < 1 || seq > App.Total)
         return false
+    rowTarget := App.SeqToRow[seq]
+    if (!rowTarget)
+        return false
 
     App.Selecting := true
     for loopBoxIndex, meta in App.ListBoxes
     {
         nameVar := meta.nameVar
         idxVar := meta.idxVar
-        if (seq >= meta.start && seq <= meta.end)
+        if (rowTarget >= meta.rowStart && rowTarget <= meta.rowEnd)
         {
-            pos := seq - meta.start + 1
+            pos := rowTarget - meta.rowStart + 1
             GuiControl, NS:Choose, %nameVar%, %pos%
             GuiControl, NS:Choose, %idxVar%, %pos%
         }
@@ -444,25 +469,77 @@ NameSel_FindSeqByName(nameText)
 ; ----------------------------
 ; Data loading
 ; ----------------------------
-NameSel_LoadItems(jsonPath)
+NameSel_LoadItemsFromSources()
 {
     global App
 
+    allItems := []
+    groups := []
+    loadWarnings := []
+    nextSeq := 1
+
+    for _, source in App.Sources
+    {
+        groupStart := nextSeq
+        loadResult := NameSel_AppendItemsFromJson(allItems, source, nextSeq)
+        groupEnd := nextSeq - 1
+        groupCount := groupEnd - groupStart + 1
+        if (groupCount < 0)
+            groupCount := 0
+
+        groups.Push({ label: source.label, startSeq: groupStart, endSeq: groupEnd, count: groupCount })
+        if (!loadResult.ok)
+            loadWarnings.Push(source.label . ": " . loadResult.error . "`n" . source.jsonPath)
+    }
+
+    if (allItems.MaxIndex() = "")
+    {
+        details := ""
+        for _, warnText in loadWarnings
+            details .= warnText . "`n`n"
+        MsgBox, 16, Error, % "No workspace data loaded.`n`n" . RTrim(details, "`n")
+        return false
+    }
+
+    App.Items := allItems
+    App.Groups := groups
+    App.LoadWarnings := loadWarnings
+    return true
+}
+
+NameSel_AppendItemsFromJson(ByRef outItems, ByRef source, ByRef nextSeq)
+{
+    result := { ok: false, error: "", count: 0 }
+    jsonPath := source.jsonPath
+
     if !FileExist(jsonPath)
     {
-        MsgBox, 16, Error, JSON not found:`n%jsonPath%
-        return false
+        result.error := "JSON not found"
+        return result
     }
 
     FileRead, jsonText, %jsonPath%
     if (ErrorLevel)
     {
-        MsgBox, 16, Error, Failed to read JSON:`n%jsonPath%
-        return false
+        result.error := "Failed to read JSON"
+        return result
     }
 
-    parsedItems := []
-    seq := 1
+    count := NameSel_ParseJsonItems(jsonText, source.label, source.cmdTemplate, outItems, nextSeq)
+    if (count <= 0)
+    {
+        result.error := "No {id,name} object found in JSON"
+        return result
+    }
+
+    result.ok := true
+    result.count := count
+    return result
+}
+
+NameSel_ParseJsonItems(jsonText, sourceLabel, cmdTemplate, ByRef outItems, ByRef nextSeq)
+{
+    parsedCount := 0
     pos := 1
     objPattern := "\{[^{}]*\}"
 
@@ -476,21 +553,54 @@ NameSel_LoadItems(jsonPath)
         {
             objId := NameSel_JsonUnescape(mId1)
             objName := NameSel_JsonUnescape(mName1)
-            parsedItems.Push({ seq: seq, name: objName, id: objId })
-            seq++
+            outItems.Push({ seq: nextSeq, name: objName, id: objId, source: sourceLabel, cmdTemplate: cmdTemplate })
+            nextSeq++
+            parsedCount++
         }
 
         pos += StrLen(objMatch)
     }
+    return parsedCount
+}
 
-    if (parsedItems.MaxIndex() = "")
+NameSel_BuildDisplayRows()
+{
+    global App
+
+    displayRows := []
+    seqToRow := {}
+    sepPad := Chr(160)
+
+    for _, group in App.Groups
     {
-        MsgBox, 16, Error, No {id,name} object found in JSON.
-        return false
+        if (group.count <= 0)
+            continue
+
+        if (displayRows.MaxIndex() >= 1)
+        {
+            Loop, % App.GroupGapRows
+                displayRows.Push({ kind: "sep", name: sepPad, idx: sepPad })
+            displayRows.Push({ kind: "sep", name: "----- " . group.label . " -----", idx: sepPad })
+            Loop, % App.GroupGapRows
+                displayRows.Push({ kind: "sep", name: sepPad, idx: sepPad })
+        }
+
+        seq := group.startSeq
+        while (seq <= group.endSeq)
+        {
+            item := App.Items[seq]
+            rowIndex := displayRows.MaxIndex() + 1
+            displayRows.Push({ kind: "item", seq: seq, name: item.name, idx: "[" . item.seq . "]" })
+            seqToRow[seq] := rowIndex
+            seq++
+        }
     }
 
-    App.Items := parsedItems
-    return true
+    App.DisplayRows := displayRows
+    App.SeqToRow := seqToRow
+    App.DisplayTotal := displayRows.MaxIndex()
+    if (App.DisplayTotal = "")
+        App.DisplayTotal := 0
 }
 
 ; ----------------------------
@@ -520,11 +630,17 @@ NameSel_SaveConfig()
 ; ----------------------------
 ; Command run
 ; ----------------------------
-NameSel_WriteAndRunCmd(id)
+NameSel_WriteAndRunCmd(item)
 {
     global App
 
-    cmdBody := StrReplace(App.CmdTemplate, "{id}", id)
+    if !IsObject(item)
+        return ""
+
+    cmdTemplate := item.cmdTemplate
+    if (cmdTemplate = "")
+        cmdTemplate := App.CmdTemplate
+    cmdBody := StrReplace(cmdTemplate, "{id}", item.id)
     runTarget := ComSpec . " /c " . Chr(34) . cmdBody . Chr(34)
     Run, %runTarget%,, Hide UseErrorLevel
     if (ErrorLevel)
@@ -735,12 +851,15 @@ NameSel_FocusCurrentList()
         fn_seq := App.LastSeq
     if (fn_seq < 1 || fn_seq > App.Total)
         return
+    fn_row := App.SeqToRow[fn_seq]
+    if (!fn_row)
+        return
 
     for _, fn_meta in App.ListBoxes
     {
-        if (fn_seq >= fn_meta.start && fn_seq <= fn_meta.end)
+        if (fn_row >= fn_meta.rowStart && fn_row <= fn_meta.rowEnd)
         {
-            fn_pos := fn_seq - fn_meta.start + 1
+            fn_pos := fn_row - fn_meta.rowStart + 1
             App.Selecting := true
             GuiControl, NS:Choose, % fn_meta.nameVar, %fn_pos%
             GuiControl, NS:Choose, % fn_meta.idxVar, %fn_pos%
