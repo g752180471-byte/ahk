@@ -206,10 +206,12 @@ NameSel_Init()
 
     stableJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge\User Data\Default\Workspaces\WorkspacesCache"
     betaJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge Beta\User Data\Profile 1\Workspaces\WorkspacesCache"
+    sxsJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge SxS\User Data\Default\Workspaces\WorkspacesCache"
 
     ; Command template. {id} will be replaced.
     defaultCmdTemplate := """C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"" --launch-workspace={id}"
     betaCmdTemplate := """C:\Program Files (x86)\Microsoft\Edge Beta\Application\msedge.exe"" --launch-workspace={id}"
+    sxsCmdTemplate := """C:\Users\75218\AppData\Local\Microsoft\Edge SxS\Application\msedge.exe"" --launch-workspace={id}"
 
     IniRead, confTpl, % App.IniPath, Config, CmdTemplate, %defaultCmdTemplate%
     if (confTpl = "" || confTpl = "ERROR")
@@ -229,6 +231,7 @@ NameSel_Init()
     App.Sources := []
     App.Sources.Push({ label: "Edge", jsonPath: stableJsonPath, cmdTemplate: confTpl })
     App.Sources.Push({ label: "Edge Beta", jsonPath: betaJsonPath, cmdTemplate: betaCmdTemplate })
+    App.Sources.Push({ label: "Edge SxS", jsonPath: sxsJsonPath, cmdTemplate: sxsCmdTemplate })
     App.SeqHistory := NameSel_LoadSeqHistory(App.IniPath, 10)
 
     if !NameSel_LoadItemsFromSources()
