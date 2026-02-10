@@ -625,6 +625,12 @@ NameSel_ParseJsonItems(jsonText, sourceLabel, cmdTemplate, ByRef outItems, ByRef
         {
             objId := NameSel_JsonUnescape(mId1)
             objName := NameSel_JsonUnescape(mName1)
+            ; Skip items marked as deprecated/invalid in name.
+            if InStr(objName, "作废", false)
+            {
+                pos += StrLen(objMatch)
+                continue
+            }
             outItems.Push({ seq: nextSeq, name: objName, id: objId, source: sourceLabel, cmdTemplate: cmdTemplate })
             nextSeq++
             parsedCount++
