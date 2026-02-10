@@ -224,6 +224,9 @@ NameSel_Init()
     App.LastSeq := 1
     App.LastInput := ""
     App.SeqHistory := []
+    App.PinnedFilePath := "C:\Users\75218\Nutstore\1\我的坚果云\我-使用说明书.pptx"
+    App.PinnedFileName := "我-使用说明书.pptx"
+    App.PinnedFileCmdTemplate := "start " . Chr(34) . Chr(34) . " " . Chr(34) . "{id}" . Chr(34)
 
     App.MaxBoxes := 12
     App.BaseRowsPerBox := 50
@@ -549,10 +552,28 @@ NameSel_LoadItemsFromSources()
     groups := []
     loadWarnings := []
     nextSeq := 1
+    pinnedAdded := false
+    pinnedPath := App.PinnedFilePath
 
     for _, source in App.Sources
     {
         groupStart := nextSeq
+
+        if (!pinnedAdded && pinnedPath != "")
+        {
+            pinnedName := App.PinnedFileName
+            if (pinnedName = "")
+            {
+                SplitPath, pinnedPath, pinnedName
+                if (pinnedName = "")
+                    pinnedName := pinnedPath
+            }
+            pinnedItem := { seq: nextSeq, name: pinnedName, id: pinnedPath, source: source.label, cmdTemplate: App.PinnedFileCmdTemplate }
+            allItems.Push(pinnedItem)
+            nextSeq++
+            pinnedAdded := true
+        }
+
         loadResult := NameSel_AppendItemsFromJson(allItems, source, nextSeq)
         groupEnd := nextSeq - 1
         groupCount := groupEnd - groupStart + 1
