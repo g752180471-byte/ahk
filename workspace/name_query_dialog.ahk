@@ -11,6 +11,12 @@ SendMode Input
 SetWorkingDir %A_ScriptDir%
 FileEncoding, UTF-8
 
+;;  
+;;大纲1
+;;  
+;;  
+;;1. 全局变量与状态
+;;  
 global App := {}
 global NS_SeqInput := ""
 global NS_List1 := "", NS_List2 := "", NS_List3 := "", NS_List4 := ""
@@ -20,6 +26,9 @@ global NS_Idx1 := "", NS_Idx2 := "", NS_Idx3 := "", NS_Idx4 := ""
 global NS_Idx5 := "", NS_Idx6 := "", NS_Idx7 := "", NS_Idx8 := ""
 global NS_Idx9 := "", NS_Idx10 := "", NS_Idx11 := "", NS_Idx12 := ""
 
+;;  
+;;2. 程序入口
+;;  
 if (A_LineFile = A_ScriptFullPath)
 {
     NameSel_RunDialog()
@@ -27,6 +36,9 @@ if (A_LineFile = A_ScriptFullPath)
 }
 return
 
+;;  
+;;2.1 对话框主流程
+;;  
 NameSel_RunDialog()
 {
     global App
@@ -49,6 +61,9 @@ NameSel_RunDialog()
 ; ----------------------------
 ; GUI events
 ; ----------------------------
+;;  
+;;5. 交互事件
+;;  
 NS_SeqChanged:
     global NS_SeqInput, App
     if (App.InputUpdating)
@@ -165,11 +180,22 @@ return
 Down::
     NameSel_HandleDownKey()
 return
+
+;;  
+;;7.0 Ctrl 热键入口（高亮行）
+;;  
+~LControl Up::
+~RControl Up::
+    NameSel_HandleCtrlTap()
+return
 #If
 
 ; ----------------------------
 ; Init / GUI
 ; ----------------------------
+;;  
+;;3. 初始化
+;;  
 NameSel_Init()
 {
     global App
@@ -183,7 +209,7 @@ NameSel_Init()
     App.SeqToRow := {}
     App.Groups := []
     App.DisplayTotal := 0
-    App.GroupGapRows := 1
+    App.GroupGapRows := 3
     App.LoadWarnings := []
     App.ListBoxes := {}
     App.Selecting := false
@@ -231,7 +257,7 @@ NameSel_Init()
     App.Sources := []
     App.Sources.Push({ label: "Edge", jsonPath: stableJsonPath, cmdTemplate: confTpl })
     App.Sources.Push({ label: "Edge Beta", jsonPath: betaJsonPath, cmdTemplate: betaCmdTemplate })
-    App.Sources.Push({ label: "Edge SxS", jsonPath: sxsJsonPath, cmdTemplate: sxsCmdTemplate })
+    App.Sources.Push({ label: "Edge Can", jsonPath: sxsJsonPath, cmdTemplate: sxsCmdTemplate })
     App.SeqHistory := NameSel_LoadSeqHistory(App.IniPath, 10)
 
     if !NameSel_LoadItemsFromSources()
@@ -281,6 +307,9 @@ NameSel_Init()
     App.Ready := true
 }
 
+;;  
+;;4. GUI 构建与展示
+;;  
 NameSel_ShowGui()
 {
     global App, NS_SeqInput
@@ -292,6 +321,7 @@ NameSel_ShowGui()
     if (App.GuiHwnd && WinExist("ahk_id " . App.GuiHwnd))
     {
         hwnd := App.GuiHwnd
+        WinSet, AlwaysOnTop, Off, ahk_id %hwnd%
         Gui, NS:Show
         WinShow, ahk_id %hwnd%
         WinActivate, ahk_id %hwnd%
@@ -318,8 +348,9 @@ NameSel_ShowGui()
     winW := listStartX + (App.BoxCount * panelW) + ((App.BoxCount - 1) * listGap) + 20
     winH := buttonY + 90
 
-    Gui, NS:New, +AlwaysOnTop +Resize -MinimizeBox +LabelNSGui +HwndhGui, Name Selector
+    Gui, NS:New, +Resize -MinimizeBox +LabelNSGui +HwndhGui, Name Selector
     App.GuiHwnd := hGui
+    WinSet, AlwaysOnTop, Off, ahk_id %hGui%
     Gui, NS:Font, s10, Microsoft YaHei
 
     histList := NameSel_HistoryForList(App.SeqHistory, App.LastInput, 10)
@@ -370,6 +401,12 @@ NameSel_ShowGui()
     NameSel_SetSeqInputText(App.LastInput, true)
 }
 
+;;  
+;;6. 查询与选择逻辑
+;;  
+;;  
+;;6.1 高亮显示：按序号选中列表项
+;;  
 NameSel_SelectBySeq(seq, writeInput := false)
 {
     global App
@@ -432,18 +469,47 @@ NameSel_SelectByInputText(inputText, showNotice)
         return fn_ok
     }
 
-    fnTargetSeq := NameSel_FindSeqByName(fn_text)
-    if (fnTargetSeq < 1)
+    fn_matches := NameSel_FindSeqMatches(fn_text)
+    if (fn_matches.MaxIndex() = "")
     {
         if (showNotice)
             MsgBox, 48, Notice, No matching name found.
         return false
     }
 
+    fnTargetSeq := fn_matches[1]
     fn_ok := NameSel_SelectBySeq(fnTargetSeq, false)
     if (fn_ok)
         App.LastInput := fn_text
     return fn_ok
+}
+
+NameSel_FindSeqMatches(nameText)
+{
+    global App
+
+    fn_nameText := Trim(nameText)
+    fn_matches := []
+    if (fn_nameText = "")
+        return fn_matches
+
+    ; Exact matches first.
+    for fn_seq, fn_item in App.Items
+    {
+        if (fn_item.name = fn_nameText)
+            fn_matches.Push(fn_seq)
+    }
+
+    ; Then fuzzy matches.
+    for fn_seq, fn_item in App.Items
+    {
+        if (fn_item.name = fn_nameText)
+            continue
+        if InStr(fn_item.name, fn_nameText, false)
+            fn_matches.Push(fn_seq)
+    }
+
+    return fn_matches
 }
 
 NameSel_FindSeqByName(nameText)
@@ -472,6 +538,9 @@ NameSel_FindSeqByName(nameText)
 ; ----------------------------
 ; Data loading
 ; ----------------------------
+;;  
+;;8. 数据加载与解析
+;;  
 NameSel_LoadItemsFromSources()
 {
     global App
@@ -592,8 +661,8 @@ NameSel_BuildDisplayRows()
         while (seq <= group.endSeq)
         {
             item := App.Items[seq]
-            rowIndex := displayRows.MaxIndex() + 1
             displayRows.Push({ kind: "item", seq: seq, name: item.name, idx: "[" . item.seq . "]" })
+            rowIndex := displayRows.MaxIndex()
             seqToRow[seq] := rowIndex
             seq++
         }
@@ -609,6 +678,9 @@ NameSel_BuildDisplayRows()
 ; ----------------------------
 ; Runtime/config
 ; ----------------------------
+;;  
+;;9. 运行与持久化
+;;  
 NameSel_SaveRuntime(seq, name, id, cmdLine)
 {
     global App
@@ -845,6 +917,9 @@ NameSel_IsSearchFocused()
     return (fn_hFocus = fn_hSeq)
 }
 
+;;  
+;;10.1 高亮显示：聚焦当前选中项
+;;  
 NameSel_FocusCurrentList()
 {
     global App
@@ -874,6 +949,9 @@ NameSel_FocusCurrentList()
     }
 }
 
+;;  
+;;10. 键盘导航与辅助函数
+;;  
 NameSel_HandleTabKey()
 {
     global App
@@ -927,6 +1005,53 @@ NameSel_HandleDownKey()
         NameSel_ListStep(1)
     else
         NameSel_BrowseHistory(1)
+}
+
+;;  
+;;7. 多结果切换（Ctrl 单击切换下一个模糊匹配）
+;;  
+NameSel_HandleCtrlTap()
+{
+    global App, NS_SeqInput
+
+    ; Ignore Ctrl combinations such as Ctrl+C, Ctrl+V.
+    if (A_PriorKey != "LControl" && A_PriorKey != "RControl")
+        return false
+
+    Gui, NS:Submit, NoHide
+    fn_text := Trim(NS_SeqInput . "")
+    if (fn_text = "")
+        return false
+    if RegExMatch(fn_text, "^\d+$")
+        return false
+
+    fn_matches := NameSel_FindSeqMatches(fn_text)
+    fn_count := fn_matches.MaxIndex()
+    if (fn_count = "" || fn_count <= 1)
+        return false
+
+    fn_currPos := 0
+    for fn_i, fn_seq in fn_matches
+    {
+        if (fn_seq = App.SelectedSeq)
+        {
+            fn_currPos := fn_i
+            break
+        }
+    }
+
+    if (fn_currPos <= 0 || fn_currPos >= fn_count)
+        fn_nextPos := 1
+    else
+        fn_nextPos := fn_currPos + 1
+
+    fn_target := fn_matches[fn_nextPos]
+    if !NameSel_SelectBySeq(fn_target, false)
+        return false
+
+    App.ListNavMode := true
+    App.LastInput := fn_text
+    return true
 }
 
 NameSel_ListStep(step)

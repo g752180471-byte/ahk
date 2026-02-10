@@ -1,0 +1,7 @@
+{
+  "code-runner.executorMap": {
+    "ahk": "\"C:\\Program Files\\AutoHotkey\\v1.1.37.02\\AutoHotkeyU32.exe\"",
+    "autohotkey": "\"C:\\Program Files\\AutoHotkey\\v1.1.37.02\\AutoHotkeyU32.exe\""
+  },
+  "code-runner.runInTerminal": true
+}
