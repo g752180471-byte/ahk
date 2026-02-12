@@ -132,7 +132,9 @@ NS_Confirm:
     Gui, NS:Submit, NoHide
     selectedItem := App.Items[selectedSeq]
     selectedName := selectedItem.name
-    selectedId := selectedItem.id
+    selectedId := NameSel_GetItemEffectiveId(selectedItem)
+    if (selectedId = "")
+        return
     historyText := Trim(NS_SeqInput)
     if (historyText = "")
         historyText := selectedSeq . ""
@@ -140,6 +142,8 @@ NS_Confirm:
     App.LastInput := historyText
 
     runCmd := NameSel_WriteAndRunCmd(selectedItem)
+    if (runCmd = "")
+        return
     NameSel_SaveRuntime(selectedSeq, selectedName, selectedId, runCmd)
     NameSel_SaveConfig()
 
@@ -227,6 +231,9 @@ NameSel_Init()
     App.PinnedFilePath := "C:\Users\75218\Nutstore\1\我的坚果云\我-使用说明书.pptx"
     App.PinnedFileName := "我-使用说明书.pptx"
     App.PinnedFileCmdTemplate := "start " . Chr(34) . Chr(34) . " " . Chr(34) . "{id}" . Chr(34)
+    App.DailyPlanDir := "C:\Users\75218\Desktop\时间计划\2026"
+    App.DailyPlanName := "今日计划"
+    App.DailyPlanTag := "__daily_plan__"
 
     App.MaxBoxes := 12
     App.BaseRowsPerBox := 50
@@ -552,12 +559,22 @@ NameSel_LoadItemsFromSources()
     groups := []
     loadWarnings := []
     nextSeq := 1
+    dailyPlanAdded := false
     pinnedAdded := false
     pinnedPath := App.PinnedFilePath
 
     for _, source in App.Sources
     {
         groupStart := nextSeq
+
+        if (!dailyPlanAdded)
+        {
+            dailyPlanName := App.DailyPlanName . " (" . NameSel_GetDailyPlanY() . ")"
+            dailyPlanItem := { seq: nextSeq, name: dailyPlanName, id: App.DailyPlanTag, source: source.label, cmdTemplate: App.PinnedFileCmdTemplate, type: "daily_plan" }
+            allItems.Push(dailyPlanItem)
+            nextSeq++
+            dailyPlanAdded := true
+        }
 
         if (!pinnedAdded && pinnedPath != "")
         {
@@ -739,15 +756,47 @@ NameSel_WriteAndRunCmd(item)
     if !IsObject(item)
         return ""
 
+    targetId := NameSel_GetItemEffectiveId(item)
+    if (targetId = "")
+        return ""
+
+    if (item.type = "daily_plan" && !FileExist(targetId))
+    {
+        MsgBox, 48, Notice, % "Daily plan file not found:`n" . targetId
+        return ""
+    }
+
     cmdTemplate := item.cmdTemplate
     if (cmdTemplate = "")
         cmdTemplate := App.CmdTemplate
-    cmdBody := StrReplace(cmdTemplate, "{id}", item.id)
+    cmdBody := StrReplace(cmdTemplate, "{id}", targetId)
     runTarget := ComSpec . " /c " . Chr(34) . cmdBody . Chr(34)
     Run, %runTarget%,, Hide UseErrorLevel
     if (ErrorLevel)
         MsgBox, 48, Notice, Failed to run command:`n%cmdBody%
     return cmdBody
+}
+
+NameSel_GetItemEffectiveId(item)
+{
+    if !IsObject(item)
+        return ""
+
+    if (item.type = "daily_plan")
+        return NameSel_GetDailyPlanPath()
+
+    return item.id
+}
+
+NameSel_GetDailyPlanY()
+{
+    return A_MM . "." . A_DD
+}
+
+NameSel_GetDailyPlanPath()
+{
+    global App
+    return App.DailyPlanDir . "\" . NameSel_GetDailyPlanY() . ".xlsx"
 }
 
 NameSel_IsActive()
