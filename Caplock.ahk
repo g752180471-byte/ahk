@@ -56,8 +56,25 @@ Capslock & S::
     ; ShowDesktopList()
 
 Return
-;;Cap+d   点击索引
-Capslock & d::Click 535, 40
+;;Cap+d   一键打开---顺序
+Capslock & d::
+ nScript := A_ScriptDir . "\workspace\name_query_buttons.ahk"
+    if !FileExist(nScript)
+    {
+        MsgBox, 48, 提示, 未找到脚本：`n%nScript%
+        return
+    }
+
+    ahkExe := A_AhkPath
+    if !FileExist(ahkExe)
+        ahkExe := "C:\Program Files\AutoHotkey\v1.1.37.02\AutoHotkeyU64.exe"
+
+    Run, "%ahkExe%" "%nScript%", , UseErrorLevel
+    if (ErrorLevel)
+        MsgBox, 48, 提示, 启动失败：`n%nScript%
+
+
+Return
 
 ;; 
 ;; Cap+e   幕布---节点复制+退出
