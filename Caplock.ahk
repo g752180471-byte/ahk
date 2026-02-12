@@ -238,7 +238,7 @@ return
 
 ;; Cap+3   win---切到主界面
 Capslock & 3::
-    cmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ""Switch-Desktop -Desktop 0.索引"""
+    cmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ""Switch-Desktop -Desktop 3.Ai搜索"""
     Run, %cmd%, , Hide
 
 return

@@ -766,6 +766,19 @@ NameSel_WriteAndRunCmd(item)
         return ""
     }
 
+    ; Open real files directly so Office can reuse/activate existing windows.
+    if NameSel_IsExistingFile(targetId)
+    {
+        Run, %targetId%,, UseErrorLevel
+        if (ErrorLevel)
+        {
+            MsgBox, 48, Notice, Failed to open file:`n%targetId%
+            return ""
+        }
+        NameSel_TryActivateOfficeWindow(targetId)
+        return targetId
+    }
+
     cmdTemplate := item.cmdTemplate
     if (cmdTemplate = "")
         cmdTemplate := App.CmdTemplate
@@ -775,6 +788,34 @@ NameSel_WriteAndRunCmd(item)
     if (ErrorLevel)
         MsgBox, 48, Notice, Failed to run command:`n%cmdBody%
     return cmdBody
+}
+
+NameSel_IsExistingFile(path)
+{
+    attrs := FileExist(path)
+    if (attrs = "")
+        return false
+    return !InStr(attrs, "D")
+}
+
+NameSel_TryActivateOfficeWindow(filePath)
+{
+    SplitPath, filePath, , , ext
+    StringLower, ext, ext
+
+    if (ext = "xlsx" || ext = "xls" || ext = "xlsm" || ext = "xlsb")
+    {
+        Sleep, 120
+        WinActivate, ahk_exe EXCEL.EXE
+        return
+    }
+
+    if (ext = "pptx" || ext = "ppt" || ext = "pptm")
+    {
+        Sleep, 120
+        WinActivate, ahk_exe POWERPNT.EXE
+        return
+    }
 }
 
 NameSel_GetItemEffectiveId(item)
