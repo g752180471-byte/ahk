@@ -2,7 +2,7 @@
 ; Fixed-button launcher:
 ; 1) Keep xlsx/pptx behavior from name_query_dialog.ahk
 ; 2) Remove List 3/4 panels completely
-; 3) Pin num=3 and num=4 commands as fixed buttons (independent from future dialog changes)
+; 3) Pin num=3, num=4, and num=125 commands as fixed buttons (independent from future dialog changes)
 
 #Requires AutoHotkey v1.1.33+
 #NoEnv
@@ -50,6 +50,7 @@ NQ_Init()
 
     ; Fixed command template (do not read from ini, so it will not drift).
     App.FixedEdgeCmdTemplate := """C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"" --launch-workspace={id}"
+    App.FixedEdgeCanCmdTemplate := """C:\Users\75218\AppData\Local\Microsoft\Edge SxS\Application\msedge.exe"" --launch-workspace={id}"
 
     ; Fixed num=3 / num=4 snapshot from current name_query_dialog data source.
     ; These ids are intentionally hardcoded.
@@ -63,6 +64,13 @@ NQ_Init()
         , name: "我-使用说明+元架构所有信息"
         , id: "f3d4097b-e065-46fc-be91-7a70186151a0"
         , cmdTemplate: App.FixedEdgeCmdTemplate
+        , type: "fixed_workspace" }
+
+    ; Fixed num=125 snapshot from current name_query_dialog data source.
+    App.FixedNum125Item := { seq: 125
+        , name: "____②notion日历"
+        , id: "6f785fef-827d-4340-b56a-1f171946271b"
+        , cmdTemplate: App.FixedEdgeCanCmdTemplate
         , type: "fixed_workspace" }
 
     dailyName := App.DailyPlanName . " (" . NQ_GetDailyPlanY() . ")"
@@ -98,16 +106,20 @@ NQ_ShowGui()
 
     Gui, NQ:Add, Text, x%leftX% y%y%, 聚焦界面
     y += 26
-    Gui, NQ:Add, Button, Default hwndhBtnDaily x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed4, 1.第一顺序-(幕布)
+
+    
+    Gui, NQ:Add, Button, Default hwndhBtnDaily x%leftX% y%y% w%btnW% h%btnH% gNQ_OpenPinned, 0.第三视角--看我(.pptx)
     y += btnH + gapY
-    Gui, NQ:Add, Button, x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed3,  2.目标+任务列表（幕布）
+    Gui, NQ:Add, Button,  x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed4, 1.第一顺序-(幕布)-情绪、时间、空间(知识点所在位置查找方法)
     y += btnH + gapY
-    Gui, NQ:Add, Button, x%leftX% y%y% w%btnW% h%btnH% gNQ_OpenDaily, 3.每日行动 (.xlsx)
+    Gui, NQ:Add, Button, x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed3,  a.目标+任务列表（幕布）
     y += btnH + gapY
-    Gui, NQ:Add, Button, x%leftX% y%y% w%btnW% h%btnH% gNQ_OpenPinned, 第一顺序-原理 (.pptx)
+    Gui, NQ:Add, Button, x%leftX% y%y% w%btnW% h%btnH% gNQ_OpenDaily, b.每天---目标+行动 (.xlsx)
+    y += btnH + gapY
+    Gui, NQ:Add, Button, x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed125, c.日历
     y += btnH + gapY+100
     Gui, NQ:Add, Button, x%leftX% y%y% w%btnW% h%btnH% gNQ_Close, 关闭
-
+    
     Gui, NQ:Show, AutoSize Center, Workspace Fixed Buttons
     WinActivate, ahk_id %hGui%
     WinWaitActive, ahk_id %hGui%,, 1
@@ -136,6 +148,12 @@ return
 NQ_RunFixed4:
     global App
     if (NQ_ExecuteItem(App.FixedNum4Item))
+        Gosub, NQ_Close
+return
+
+NQ_RunFixed125:
+    global App
+    if (NQ_ExecuteItem(App.FixedNum125Item))
         Gosub, NQ_Close
 return
 
