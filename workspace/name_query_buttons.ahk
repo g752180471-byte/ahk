@@ -117,22 +117,26 @@ NQ_ShowGui()
 
 NQ_OpenDaily:
     global App
-    NQ_ExecuteItem(App.DailyPlanItem)
+    if (NQ_ExecuteItem(App.DailyPlanItem))
+        Gosub, NQ_Close
 return
 
 NQ_OpenPinned:
     global App
-    NQ_ExecuteItem(App.PinnedItem)
+    if (NQ_ExecuteItem(App.PinnedItem))
+        Gosub, NQ_Close
 return
 
 NQ_RunFixed3:
     global App
-    NQ_ExecuteItem(App.FixedNum3Item)
+    if (NQ_ExecuteItem(App.FixedNum3Item))
+        Gosub, NQ_Close
 return
 
 NQ_RunFixed4:
     global App
-    NQ_ExecuteItem(App.FixedNum4Item)
+    if (NQ_ExecuteItem(App.FixedNum4Item))
+        Gosub, NQ_Close
 return
 
 NQ_Close:
