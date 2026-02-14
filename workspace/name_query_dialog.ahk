@@ -243,11 +243,16 @@ NameSel_Init()
     stableJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge\User Data\Default\Workspaces\WorkspacesCache"
     betaJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge Beta\User Data\Profile 1\Workspaces\WorkspacesCache"
     sxsJsonPath := "C:\Users\75218\AppData\Local\Microsoft\Edge SxS\User Data\Default\Workspaces\WorkspacesCache"
+    stableMirrorPath := fn_libDir . "\WorkspacesCache_edge_stable.json"
+    betaMirrorPath := fn_libDir . "\WorkspacesCache_edge_beta.json"
 
     ; Command template. {id} will be replaced.
     defaultCmdTemplate := """C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"" --launch-workspace={id}"
     betaCmdTemplate := """C:\Program Files (x86)\Microsoft\Edge Beta\Application\msedge.exe"" --launch-workspace={id}"
     sxsCmdTemplate := """C:\Users\75218\AppData\Local\Microsoft\Edge SxS\Application\msedge.exe"" --launch-workspace={id}"
+
+    stableJsonPath := NameSel_SyncToWorkspaceMirror(stableJsonPath, stableMirrorPath)
+    betaJsonPath := NameSel_SyncToWorkspaceMirror(betaJsonPath, betaMirrorPath)
 
     IniRead, confTpl, % App.IniPath, Config, CmdTemplate, %defaultCmdTemplate%
     if (confTpl = "" || confTpl = "ERROR")
@@ -1229,6 +1234,42 @@ NameSel_IsListFocused()
 ; ----------------------------
 ; Helpers
 ; ----------------------------
+NameSel_SyncToWorkspaceMirror(sourcePath, mirrorPath)
+{
+    fn_src := sourcePath
+    fn_dst := mirrorPath
+    if (fn_src = "" || fn_dst = "")
+        return fn_src
+    if !FileExist(fn_src)
+        return fn_src
+
+    fn_copy := false
+    if !FileExist(fn_dst)
+    {
+        fn_copy := true
+    }
+    else
+    {
+        FileGetTime, fn_srcTime, %fn_src%, M
+        FileGetTime, fn_dstTime, %fn_dst%, M
+        FileGetSize, fn_srcSize, %fn_src%
+        FileGetSize, fn_dstSize, %fn_dst%
+        if (fn_srcTime != fn_dstTime || fn_srcSize != fn_dstSize)
+            fn_copy := true
+    }
+
+    if (fn_copy)
+    {
+        FileCopy, %fn_src%, %fn_dst%, 1
+        if (ErrorLevel)
+            return fn_src
+        FileGetTime, fn_srcTime2, %fn_src%, M
+        if (fn_srcTime2 != "")
+            FileSetTime, %fn_srcTime2%, %fn_dst%, M
+    }
+    return fn_dst
+}
+
 NameSel_JsonUnescape(str)
 {
     placeholder := Chr(1)
