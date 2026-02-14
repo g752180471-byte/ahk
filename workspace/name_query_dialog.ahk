@@ -292,7 +292,12 @@ NameSel_Init()
 
     if (App.LastSeq < 1 || App.LastSeq > App.Total)
         App.LastSeq := 1
-    if (confLastInput != "")
+    if (App.SeqHistory.MaxIndex() >= 1)
+    {
+        ; Default search input always follows SeqHistory.item_1.
+        App.LastInput := App.SeqHistory[1]
+    }
+    else if (confLastInput != "")
     {
         if RegExMatch(confLastInput, "^\d+$")
         {
@@ -304,10 +309,6 @@ NameSel_Init()
         {
             App.LastInput := confLastInput
         }
-    }
-    else if (App.SeqHistory.MaxIndex() >= 1)
-    {
-        App.LastInput := App.SeqHistory[1]
     }
     else
     {
@@ -878,11 +879,22 @@ NameSel_SetSeqInputText(value, selectAll := false)
         ControlSetText,, %fn_text%, ahk_id %hComboEdit%
     else
         GuiControl, NS:, NS_SeqInput, %fn_text%
+    NameSel_HighlightHistorySelection(fn_text)
 
     GuiControl, NS:Focus, NS_SeqInput
     if (selectAll)
         NameSel_SelectAllSeqInput()
     App.InputUpdating := false
+}
+
+NameSel_HighlightHistorySelection(value)
+{
+    fn_text := Trim(value . "")
+
+    ; Keep list highlight synced with current text in the edit area.
+    GuiControl, NS:Choose, NS_SeqInput, 0
+    if (fn_text != "")
+        GuiControl, NS:ChooseString, NS_SeqInput, %fn_text%
 }
 
 NameSel_ArrayToPipe(ByRef arr)
@@ -956,16 +968,10 @@ NameSel_HistoryForList(ByRef historyArr, lastInput, keepN)
     fn_out := []
     fn_seen := {}
 
-    fn_last := Trim(lastInput . "")
-
     for _, fn_val in historyArr
     {
         fn_norm := Trim(fn_val . "")
         if (fn_norm = "")
-            continue
-
-        ; LastInput goes to edit box, not duplicated in list panel.
-        if (fn_last != "" && fn_norm = fn_last)
             continue
         if (fn_seen.HasKey(fn_norm))
             continue
@@ -992,7 +998,11 @@ NameSel_BrowseHistory(step)
     if (App.HistoryCursor = 0)
         App.HistoryBaseInput := fn_current
 
-    fn_newCursor := App.HistoryCursor + step
+    ; If current text already equals item_1, first Down should move to item_2.
+    if (step > 0 && App.HistoryCursor = 0 && fn_total >= 1 && fn_current = App.SeqHistory[1])
+        fn_newCursor := 2
+    else
+        fn_newCursor := App.HistoryCursor + step
     if (fn_newCursor < 0)
         fn_newCursor := 0
     if (fn_newCursor > fn_total)
@@ -1005,6 +1015,14 @@ NameSel_BrowseHistory(step)
         fn_target := App.HistoryBaseInput
     else
         fn_target := App.SeqHistory[fn_newCursor]
+
+    ; Avoid no-op redraw flicker when target text is unchanged.
+    if (fn_target = fn_current)
+    {
+        if !NameSel_SelectByInputText(fn_target, false)
+            App.LastInput := fn_target
+        return
+    }
 
     NameSel_SetSeqInputText(fn_target, true)
     if !NameSel_SelectByInputText(fn_target, false)
