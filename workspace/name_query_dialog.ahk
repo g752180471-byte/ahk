@@ -1006,6 +1006,10 @@ NameSel_BrowseHistory(step)
     ; If current text already equals item_1, first Down should move to item_2.
     if (step > 0 && App.HistoryCursor = 0 && fn_total >= 1 && fn_current = App.SeqHistory[1])
         fn_newCursor := 2
+    ; If current text already equals item_1, first Up should jump to item_10.
+    else if (step < 0 && fn_total >= 1 && fn_current = App.SeqHistory[1]
+        && (App.HistoryCursor = 0 || App.HistoryCursor = 1))
+        fn_newCursor := (fn_total >= 10) ? 10 : fn_total
     else
         fn_newCursor := App.HistoryCursor + step
     if (fn_newCursor < 0)

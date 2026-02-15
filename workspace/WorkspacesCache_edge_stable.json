@@ -1,24 +1,24 @@
 {
    "edgeWorkspaceCacheVersion": 1,
    "workspaces": [ {
-      "accent": true,
+      "accent": false,
       "active": false,
       "collaboratorsCount": 1,
       "color": 12,
       "connectionUrl": "https://home.microsoftpersonalcontent.com/contentstorage/6CznihN3v0uy1zK5FrRCbw5dcc70c5bd117df1workspaces?driveId=b!pPdW_cl6fUeZuF95uUUkTYk24fiObS1BtaHEUjmPCZVi5ANBnC89QoVasTBTM7a-&itemId=01KUQJI4755MNLJYDSZNF3FUOQG3FGUAH4&path=",
-      "count": 17,
+      "count": 15,
       "edgeWorkspaceVersion": 2,
       "id": "2729230e-b451-4ba1-8f41-e98a28b09051",
       "isOwner": true,
       "isolated": false,
-      "last_active_time": 1771139920.058204,
-      "menuSubtitle": "17 个选项卡",
+      "last_active_time": 1771144154.055456,
+      "menuSubtitle": "15 个选项卡",
       "name": "信息输入",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
-      "accent": true,
+      "accent": false,
       "active": false,
       "collaboratorsCount": 1,
       "color": 12,
@@ -28,12 +28,12 @@
       "id": "e9086ca6-d1c8-41a2-999f-d6d32a652093",
       "isOwner": true,
       "isolated": false,
-      "last_active_time": 1771137523.87008,
+      "last_active_time": 1771141128.821393,
       "menuSubtitle": "4 个选项卡",
-      "name": "____0.具体顺序-电影",
+      "name": "____0.具体视频、",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
       "accent": false,
       "active": false,
@@ -69,7 +69,7 @@
       "showDisconnectedUI": false,
       "workspaceFluidStatus": 0
    }, {
-      "accent": false,
+      "accent": true,
       "active": false,
       "collaboratorsCount": 1,
       "color": 12,
@@ -84,7 +84,7 @@
       "name": "我-使用说明+元架构所有信息",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 0
+      "workspaceFluidStatus": 2
    }, {
       "accent": false,
       "active": false,
@@ -172,22 +172,22 @@
       "showDisconnectedUI": false,
       "workspaceFluidStatus": 0
    }, {
-      "accent": true,
+      "accent": false,
       "active": false,
       "collaboratorsCount": 1,
       "color": 12,
       "connectionUrl": "https://home.microsoftpersonalcontent.com/contentstorage/6CznihN3v0uy1zK5FrRCbw5dcc70c5bd117df1workspaces?driveId=b!pPdW_cl6fUeZuF95uUUkTYk24fiObS1BtaHEUjmPCZVi5ANBnC89QoVasTBTM7a-&itemId=01KUQJI4ZQAA5YK47LYZEYWTO7K7Z3DHUM&path=",
-      "count": 7,
+      "count": 10,
       "edgeWorkspaceVersion": 2,
       "id": "f2ea51d7-9710-46b5-89b0-1cbb7e175255",
       "isOwner": true,
       "isolated": false,
-      "last_active_time": 1771138714.297979,
-      "menuSubtitle": "7 个选项卡",
+      "last_active_time": 1771140788.110366,
+      "menuSubtitle": "10 个选项卡",
       "name": "_____②豆包-国内ai",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
       "accent": false,
       "active": false,
@@ -525,7 +525,7 @@
       "showDisconnectedUI": false,
       "workspaceFluidStatus": 0
    }, {
-      "accent": true,
+      "accent": false,
       "active": false,
       "collaboratorsCount": 1,
       "color": 12,
@@ -540,10 +540,10 @@
       "name": "-7.标记",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
-      "accent": true,
-      "active": true,
+      "accent": false,
+      "active": false,
       "collaboratorsCount": 1,
       "color": 12,
       "connectionUrl": "https://home.microsoftpersonalcontent.com/contentstorage/6CznihN3v0uy1zK5FrRCbw5dcc70c5bd117df1workspaces?driveId=b!pPdW_cl6fUeZuF95uUUkTYk24fiObS1BtaHEUjmPCZVi5ANBnC89QoVasTBTM7a-&itemId=01KUQJI46VN23ETXFZ3FAKISB2TU6ISRPK&path=",
@@ -557,7 +557,7 @@
       "name": "-6.临时_标签页",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
       "accent": false,
       "active": false,
@@ -577,7 +577,7 @@
    }, {
       "accent": false,
       "active": false,
-      "collaboratorsCount": 0,
+      "collaboratorsCount": 1,
       "color": 12,
       "connectionUrl": "https://home.microsoftpersonalcontent.com/contentstorage/6CznihN3v0uy1zK5FrRCbw5dcc70c5bd117df1workspaces?driveId=b!pPdW_cl6fUeZuF95uUUkTYk24fiObS1BtaHEUjmPCZVi5ANBnC89QoVasTBTM7a-&itemId=01KUQJI43J2UTK7OJ3GBEJQKTVMTW7IY52&path=",
       "count": 10,
@@ -585,6 +585,7 @@
       "id": "a6223ab9-eeca-405a-9c9a-2852cd7c621e",
       "isOwner": true,
       "isolated": false,
+      "last_active_time": 1771140065.902388,
       "menuSubtitle": "10 个选项卡",
       "name": "-4.第二大脑",
       "shared": false,
@@ -1299,13 +1300,13 @@
       "collaboratorsCount": 1,
       "color": 12,
       "connectionUrl": "https://home.microsoftpersonalcontent.com/contentstorage/6CznihN3v0uy1zK5FrRCbw5dcc70c5bd117df1workspaces?driveId=b!pPdW_cl6fUeZuF95uUUkTYk24fiObS1BtaHEUjmPCZVi5ANBnC89QoVasTBTM7a-&itemId=01KUQJI42OOS6JUWB225E26D3OSFHCDQ73&path=",
-      "count": 14,
+      "count": 15,
       "edgeWorkspaceVersion": 2,
       "id": "5efcb649-49c6-4db5-a1ce-5a01cfa46b2a",
       "isOwner": true,
       "isolated": false,
-      "last_active_time": 1770920712.239101,
-      "menuSubtitle": "14 个选项卡",
+      "last_active_time": 1771143751.578741,
+      "menuSubtitle": "15 个选项卡",
       "name": "____-②.电脑软件",
       "shared": false,
       "showDisconnectedUI": false,
@@ -1350,13 +1351,13 @@
       "collaboratorsCount": 1,
       "color": 12,
       "connectionUrl": "https://home.microsoftpersonalcontent.com/contentstorage/6CznihN3v0uy1zK5FrRCbw5dcc70c5bd117df1workspaces?driveId=b!pPdW_cl6fUeZuF95uUUkTYk24fiObS1BtaHEUjmPCZVi5ANBnC89QoVasTBTM7a-&itemId=01KUQJI45DMFTGNNYZU5FZSYCWEM3VGTB5&path=",
-      "count": 15,
+      "count": 16,
       "edgeWorkspaceVersion": 2,
       "id": "38b2a015-4773-4b02-a853-34c90062b663",
       "isOwner": true,
       "isolated": false,
-      "last_active_time": 1770325232.589802,
-      "menuSubtitle": "15 个选项卡",
+      "last_active_time": 1771143749.225064,
+      "menuSubtitle": "16 个选项卡",
       "name": "____手机软件",
       "shared": false,
       "showDisconnectedUI": false,

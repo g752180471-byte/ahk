@@ -111,7 +111,7 @@ NQ_ShowGui()
     Gui, NQ:Add, Button, Default hwndhBtnDaily x%leftX% y%y% w%btnW% h%btnH% gNQ_OpenPinned, 0.第三视角--看我(.pptx)
     y += btnH + gapY+20
     ; Gui, NQ:Add, Button,  x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed4, 1.第一顺序-(幕布)-情绪、时间、空间(知识点所在位置查找方法)
-    Gui, NQ:Add, Button,  x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed4, 1.第三视角--看我(.幕布)
+    Gui, NQ:Add, Button,  x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed4, 0.第三视角--看我(.幕布)
     y += btnH + gapY+40
     Gui, NQ:Add, Button, x%leftX% y%y% w%btnW% h%btnH% gNQ_RunFixed3,  a.目标+任务列表（幕布）
     y += btnH + gapY
