@@ -413,7 +413,7 @@ NameSel_ShowGui()
     }
 
     Gui, NS:Show, Center w%winW% h%winH%, Name Selector
-    NameSel_SelectByInputText(App.LastInput, false)
+    NameSel_SelectByInputText(App.LastInput, false, false, true)
     NameSel_SetSeqInputText(App.LastInput, true)
 }
 
@@ -462,7 +462,7 @@ NameSel_SelectBySeq(seq, writeInput := false)
     return true
 }
 
-NameSel_SelectByInputText(inputText, showNotice)
+NameSel_SelectByInputText(inputText, showNotice, allowHistoryShortcut := true, allowLegacyNumber := false)
 {
     global App
 
@@ -470,19 +470,32 @@ NameSel_SelectByInputText(inputText, showNotice)
     if (fn_text = "")
         return false
 
-    if RegExMatch(fn_text, "^\d+$")
+    if (SubStr(fn_text, 1, 1) = "*")
     {
-        fnTargetSeq := fn_text + 0
-        if (fnTargetSeq < 1 || fnTargetSeq > App.Total)
+        fn_numText := Trim(SubStr(fn_text, 2))
+        if !RegExMatch(fn_numText, "^\d+$")
         {
             if (showNotice)
-                MsgBox, 48, Notice, % "Sequence out of range. 1 - " . App.Total
+                MsgBox, 48, Notice, Use * followed by digits. Example: *12
             return false
         }
-        fn_ok := NameSel_SelectBySeq(fnTargetSeq, false)
-        if (fn_ok)
-            App.LastInput := fn_text
-        return fn_ok
+        return NameSel_SelectByNumericText(fn_numText, showNotice, "*" . fn_numText)
+    }
+
+    if (allowHistoryShortcut && RegExMatch(fn_text, "^[1-9]$"))
+    {
+        ; 1~9 -> item_1~item_9
+        fn_historyIndex := fn_text + 0
+        return NameSel_SelectHistoryByIndex(fn_historyIndex, showNotice)
+    }
+
+    if RegExMatch(fn_text, "^\d+$")
+    {
+        if (allowLegacyNumber)
+            return NameSel_SelectByNumericText(fn_text, showNotice, fn_text)
+        if (showNotice)
+            MsgBox, 48, Notice, Use * for numeric search. Example: *12
+        return false
     }
 
     fn_matches := NameSel_FindSeqMatches(fn_text)
@@ -497,6 +510,33 @@ NameSel_SelectByInputText(inputText, showNotice)
     fn_ok := NameSel_SelectBySeq(fnTargetSeq, false)
     if (fn_ok)
         App.LastInput := fn_text
+    return fn_ok
+}
+
+NameSel_SelectByNumericText(numText, showNotice, saveInputText := "")
+{
+    global App
+
+    fn_numText := Trim(numText . "")
+    if !RegExMatch(fn_numText, "^\d+$")
+        return false
+
+    fnTargetSeq := fn_numText + 0
+    if (fnTargetSeq < 1 || fnTargetSeq > App.Total)
+    {
+        if (showNotice)
+            MsgBox, 48, Notice, % "Sequence out of range. 1 - " . App.Total
+        return false
+    }
+
+    fn_ok := NameSel_SelectBySeq(fnTargetSeq, false)
+    if (fn_ok)
+    {
+        if (saveInputText = "")
+            App.LastInput := fn_numText
+        else
+            App.LastInput := saveInputText
+    }
     return fn_ok
 }
 
@@ -989,6 +1029,34 @@ NameSel_HistoryForList(ByRef historyArr, lastInput, keepN)
     return fn_out
 }
 
+NameSel_SelectHistoryByIndex(historyIndex, showNotice := false)
+{
+    global App
+
+    fn_idx := historyIndex + 0
+    if (fn_idx < 1 || fn_idx > 10 || !App.SeqHistory.HasKey(fn_idx))
+    {
+        if (showNotice)
+            MsgBox, 48, Notice, % "History item_" . fn_idx . " is empty."
+        return false
+    }
+
+    fn_target := Trim(App.SeqHistory[fn_idx] . "")
+    if (fn_target = "")
+    {
+        if (showNotice)
+            MsgBox, 48, Notice, % "History item_" . fn_idx . " is empty."
+        return false
+    }
+
+    App.HistoryCursor := fn_idx
+    App.HistoryBaseInput := fn_target
+    NameSel_SetSeqInputText(fn_target, true)
+    if !NameSel_SelectByInputText(fn_target, false, false, true)
+        App.LastInput := fn_target
+    return true
+}
+
 NameSel_BrowseHistory(step)
 {
     global App, NS_SeqInput
@@ -1028,13 +1096,13 @@ NameSel_BrowseHistory(step)
     ; Avoid no-op redraw flicker when target text is unchanged.
     if (fn_target = fn_current)
     {
-        if !NameSel_SelectByInputText(fn_target, false)
+        if !NameSel_SelectByInputText(fn_target, false, false, true)
             App.LastInput := fn_target
         return
     }
 
     NameSel_SetSeqInputText(fn_target, true)
-    if !NameSel_SelectByInputText(fn_target, false)
+    if !NameSel_SelectByInputText(fn_target, false, false, true)
         App.LastInput := fn_target
 }
 

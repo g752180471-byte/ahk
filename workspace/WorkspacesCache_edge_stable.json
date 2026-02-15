@@ -11,7 +11,7 @@
       "id": "2729230e-b451-4ba1-8f41-e98a28b09051",
       "isOwner": true,
       "isolated": false,
-      "last_active_time": 1771161235.247397,
+      "last_active_time": 1771165004.882367,
       "menuSubtitle": "16 个选项卡",
       "name": "信息输入",
       "shared": false,
@@ -52,7 +52,7 @@
       "showDisconnectedUI": false,
       "workspaceFluidStatus": 0
    }, {
-      "accent": true,
+      "accent": false,
       "active": false,
       "collaboratorsCount": 1,
       "color": 12,
@@ -67,7 +67,7 @@
       "name": "时间",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
       "accent": false,
       "active": false,
@@ -145,7 +145,7 @@
       "count": 3,
       "edgeWorkspaceVersion": 2,
       "id": "9b193c27-3d48-47e3-90cd-a863b3bb4420",
-      "isOwner": true,
+      "isOwner": false,
       "isolated": false,
       "last_active_time": 1770398961.174689,
       "menuSubtitle": "3 个共享选项卡",
@@ -172,7 +172,7 @@
       "showDisconnectedUI": false,
       "workspaceFluidStatus": 0
    }, {
-      "accent": true,
+      "accent": false,
       "active": false,
       "collaboratorsCount": 1,
       "color": 12,
@@ -187,7 +187,7 @@
       "name": "_____②豆包-国内ai",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
       "accent": false,
       "active": false,
@@ -316,7 +316,7 @@
       "count": 9,
       "edgeWorkspaceVersion": 2,
       "id": "131a31b2-0b74-47b6-bf77-1a7abb458e40",
-      "isOwner": true,
+      "isOwner": false,
       "isolated": false,
       "last_active_time": 1770369954.936669,
       "menuSubtitle": "9 个共享选项卡",
@@ -457,8 +457,8 @@
       "showDisconnectedUI": false,
       "workspaceFluidStatus": 0
    }, {
-      "accent": true,
-      "active": true,
+      "accent": false,
+      "active": false,
       "collaboratorsCount": 1,
       "color": 12,
       "connectionUrl": "https://home.microsoftpersonalcontent.com/contentstorage/6CznihN3v0uy1zK5FrRCbw5dcc70c5bd117df1workspaces?driveId=b!pPdW_cl6fUeZuF95uUUkTYk24fiObS1BtaHEUjmPCZVi5ANBnC89QoVasTBTM7a-&itemId=01KUQJI45EIWOYVIAT3ZF23HCEKHATGQST&path=",
@@ -467,12 +467,12 @@
       "id": "ff26e457-c7a6-4961-853e-0d5b08758231",
       "isOwner": true,
       "isolated": false,
-      "last_active_time": 1771161823.526344,
+      "last_active_time": 1771164051.875486,
       "menuSubtitle": "5 个选项卡",
       "name": "-98.饮食+..",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
       "accent": false,
       "active": false,
@@ -723,7 +723,7 @@
       "showDisconnectedUI": false,
       "workspaceFluidStatus": 0
    }, {
-      "accent": true,
+      "accent": false,
       "active": false,
       "collaboratorsCount": 1,
       "color": 12,
@@ -733,12 +733,12 @@
       "id": "48dd0322-4633-46c3-a22d-4968cb193e92",
       "isOwner": true,
       "isolated": false,
-      "last_active_time": 1771161466.860111,
+      "last_active_time": 1771165076.888947,
       "menuSubtitle": "8 个选项卡",
       "name": "____④娱乐4",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
       "accent": false,
       "active": false,
@@ -1648,7 +1648,7 @@
       "count": 50,
       "edgeWorkspaceVersion": 2,
       "id": "9dc9199d-5a87-4de5-8aa4-7267786f8642",
-      "isOwner": true,
+      "isOwner": false,
       "isolated": false,
       "menuSubtitle": "50 个共享选项卡",
       "name": "娱乐-历史",
