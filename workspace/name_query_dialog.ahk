@@ -147,7 +147,7 @@ NS_Confirm:
     NameSel_SaveRuntime(selectedSeq, selectedName, selectedId, runCmd)
     NameSel_SaveConfig()
 
-    Clipboard := selectedId
+    ; Clipboard := selectedId
     App.Result := { confirmed: true, canceled: false, error: "", seq: selectedSeq, name: selectedName, id: selectedId, cmd: runCmd }
     App.Done := true
     Gui, NS:Destroy

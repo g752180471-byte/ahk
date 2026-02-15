@@ -188,8 +188,8 @@
       "showDisconnectedUI": false,
       "workspaceFluidStatus": 0
    }, {
-      "accent": true,
-      "active": true,
+      "accent": false,
+      "active": false,
       "collaboratorsCount": 1,
       "color": 12,
       "connectionUrl": "https://home.microsoftpersonalcontent.com/contentstorage/6CznihN3v0uy1zK5FrRCbwc1e7243ec7727680workspaces?driveId=b!xXPq4YZuWUmBHvU0IJL3DLKPbcBFRHZBlwOeK6pBq_fjAkdEc89FSKaK_eKGA6qz&itemId=01SUHHTSEMARYJUFEFUNEIBDKKJZKFYWXN&path=",
@@ -203,7 +203,7 @@
       "name": "输入物质",
       "shared": false,
       "showDisconnectedUI": false,
-      "workspaceFluidStatus": 2
+      "workspaceFluidStatus": 0
    }, {
       "accent": false,
       "active": false,
