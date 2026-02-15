@@ -165,6 +165,38 @@ NQGuiEscape:
     ExitApp
 return
 
+#If NQ_IsActive()
+1::
+Numpad1::
+    Gosub, NQ_OpenPinned
+return
+
+2::
+Numpad2::
+    Gosub, NQ_RunFixed4
+return
+
+3::
+Numpad3::
+    Gosub, NQ_RunFixed3
+return
+
+4::
+Numpad4::
+    Gosub, NQ_OpenDaily
+return
+
+5::
+Numpad5::
+    Gosub, NQ_RunFixed125
+return
+
+6::
+Numpad6::
+    Gosub, NQ_Close
+return
+#If
+
 NQ_ExecuteItem(execItem)
 {
     if !IsObject(execItem)
@@ -292,4 +324,10 @@ NQ_GetDailyPlanPath()
 {
     global App
     return App.DailyPlanDir . "\" . NQ_GetDailyPlanY() . ".xlsx"
+}
+
+NQ_IsActive()
+{
+    global App
+    return (App.GuiHwnd && WinActive("ahk_id " . App.GuiHwnd))
 }
